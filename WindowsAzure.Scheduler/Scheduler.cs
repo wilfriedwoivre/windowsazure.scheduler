@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Newtonsoft.Json;
@@ -14,7 +15,7 @@ namespace WindowsAzure.Scheduler
     {
         private static Scheduler _instance;
         private string _storageConnectionString;
-        private readonly string _queueName = "wilfriedwoivre4windowsazurescheduler";
+        private string _queueName = "";
         private readonly static JsonSerializerSettings _serializerSettings = new JsonSerializerSettings
         {
             TypeNameHandling = TypeNameHandling.Objects
@@ -23,6 +24,20 @@ namespace WindowsAzure.Scheduler
         internal Scheduler(string storageConnectionString)
         {
             this._storageConnectionString = storageConnectionString;
+            SetQueueName();
+        }
+
+        private void SetQueueName()
+        {
+            try
+            {
+                var value = CloudConfigurationManager.GetSetting("WindowsAzure.Scheduler.QueueName");
+                if (string.IsNullOrWhiteSpace(value))
+                    value = "wilfriedwoivre4windowsazurescheduler";
+                _queueName = value;
+            }
+            catch { }
+
         }
 
         public void AddAction(SchedulingAction actionToAdd)
